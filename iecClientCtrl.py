@@ -106,7 +106,7 @@ def commandTerminationHandler(ctrl):
 		print ('Received CommandTermination+ because : ' + ctrladdcausefeedbackstr(lastApplError.addCause) + ' / ' + ctrlerrorfeedbackstr(lastApplError.error))
 
 
-''' Function to SBO Enhanced DPC control with feedback status check '''
+''' Function for SBO Enhanced DPC control with feedback status check '''
 def SBOctrlDPCEnhanced(ctrlpath,ctrlfeedbackst,iedconnerr,iedconnection,selectValue=False,operateValue=False,cancelctrl=False,ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=0,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
         
         if (iedconnerr == iec61850.IED_ERROR_OK):
@@ -153,7 +153,7 @@ def SBOctrlDPCEnhanced(ctrlpath,ctrlfeedbackst,iedconnerr,iedconnection,selectVa
                         print("Reading Status after command failed")
 
 
-''' Function to Direct Execute Enhanced DPC control with feedback status check '''
+''' Function for Direct Execute Enhanced DPC control with feedback status check '''
 def DEctrlDPCEnhanced(ctrlpath,ctrlfeedbackst,iedconnerr,iedconnection,operateValue=False,ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=0.1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
         
         if (iedconnerr == iec61850.IED_ERROR_OK):
