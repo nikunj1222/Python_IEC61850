@@ -109,7 +109,7 @@ if __name__=="__main__":
 		ctlvalue = iec61850.MmsValue_newBoolean(True)
 		iec61850.ControlObjectClient_setOrigin(control, 'script1' , 3)
 		'''iec61850.ControlObjectClient_selectWithValue(control, ctlvalue)  iec61850.ControlObjectClient_selectWithValueAsync(control,iec61850.IED_ERROR_OK,True,commandTerminationHandler,None)''' 
-		if iec61850.ControlObjectClient_selectWithValueAsync(control,err=error,ctlVal=ctlvalue,handler=commandTerminationHandler,parameter=None):
+		if iec61850.ControlObjectClient_selectWithValue(control, ctlvalue):
 			iec61850.ControlObjectClient_setInterlockCheck(control,True)
 			iec61850.ControlObjectClient_setSynchroCheck(control,False)
 			if iec61850.ControlObjectClient_operate(control, ctlvalue, 500):
