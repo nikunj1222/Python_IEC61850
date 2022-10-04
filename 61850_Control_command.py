@@ -18,9 +18,19 @@ if __name__=="__main__":
 	ctrlpath = 'TESTP30Control/CSWI1.Pos'
 	feedbackSt = 'TESTP30Control/CSWI1.Pos.stVal'
 
+	''' SBOctrlDPCEnhanced
+	(ctrlpath,ctrlfeedbackst,iedconnerr,iedconnection,selectValue=False,operateValue=False,cancelctrl=False,
+                       ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=0,cmdtimeout=3,cmdCategory=3,
+                       cmdIdentifier='script', selectctlNum=1,operatectlNum=1)
+	'''
 	if error == iec61850.IED_ERROR_OK :
-		iecClientCtrl.SBOctrlDPCEnhanced(ctrlpath,feedbackSt,error,con,False,False,False,True,False,False,1)
+		controlCmd = iecClientCtrl.SBOctrlDPCEnhanced(ctrlpath=ctrlpath,ctrlfeedbackst=feedbackSt,iedconnerr=error,iedconnection=con,
+                                                 selectValue=False,operateValue=False,cancelctrl=False,ILKBit=True,SYNCBit=False,TestBit=False,operctrltimeafterselect=1,
+                                                 cmdtimeout=3,cmdCategory=3,cmdIdentifier='script',selectctlNum=24,operatectlNum=24)
+		
 	else :
 		print('IED connection failed')
+
+	print('AddCause : ',controlCmd[0],'Error : ',controlCmd[1])
 		
 	iec61850.IedConnection_destroy(con)
