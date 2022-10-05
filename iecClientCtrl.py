@@ -39,6 +39,7 @@ def ctrlerrorfeedbackstr(Error):
 		ctrlerrRcv = 'Ctrl_ERROR_OPERATOR_TEST = 3'
 	else :
 		ctrlerrRcv = 'Ctrl error not received or not captured'
+		
 	return ctrlerrRcv
 
 def Quality_state(quality):
@@ -76,6 +77,7 @@ def Quality_state(quality):
 		Quality_st_str = 'QUALITY_DERIVED 8192'
 	else :
 		Quality_st_str = 'Quality value not received or not captured'
+		
 	return Quality_st_str
 
 def ctrladdcausefeedbackstr(AddCause):
@@ -138,6 +140,7 @@ def ctrladdcausefeedbackstr(AddCause):
 		addcauseRcv = 'Addcause_LOCKED_BY_OTHER_CLIENT = 27'
 	else :
 		addcauseRcv = 'Addcause not received or not captured'
+		
 	return addcauseRcv
 
 ''' Function to read the SPS status value'''
@@ -154,6 +157,7 @@ def ReadSPSValue(iedconnection,iedconnerr,DOpath):
 		iec61850.MmsValue_delete(qualityMMS[0])
 	else :
 		print("Reading Status after command failed")
+		
 	return SPSstate,SPSquality
 
 ''' Function to read the DPS status value'''
@@ -170,22 +174,23 @@ def ReadDPSValue(iedconnection,iedconnerr,DOpath):
 		iec61850.MmsValue_delete(qualityMMS[0])
 	else :
 		print("Reading Status after command failed")
+		
 	return DPSstate,DPSquality
 
 ##''' Function to read the INTEGER from ST status value'''
 ##def ReadSTINTValue(iedconnection,iedconnerr,DOpath):
-##	stValMMS = iec61850.IedConnection_readInt32Value(iedconnection, (DOpath+'.stVal'), iec61850.IEC61850_FC_ST)
-##	qualityMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.q'), iec61850.IEC61850_FC_ST)
-##	
-##	if (iedconnerr == iec61850.IED_ERROR_OK):
-##		INTstate = stValMMS[0]
-##		INTquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
-##		print("INT State : ", DOpath+'.stVal :' , INTstate)
-##		print("INT Quality :", DOpath+'.q :', Quality_state(INTquality))
-##		iec61850.MmsValue_delete(qualityMMS[0])
-##	else :
-##		print("Reading Status after command failed")
-##	return INTstate,INTquality
+##      stValMMS = iec61850.IedConnection_readInt32Value(iedconnection, (DOpath+'.stVal'), iec61850.IEC61850_FC_ST)
+##      qualityMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.q'), iec61850.IEC61850_FC_ST)
+##      
+##      if (iedconnerr == iec61850.IED_ERROR_OK):
+##              INTstate = stValMMS[0]
+##              INTquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+##              print("INT State : ", DOpath+'.stVal :' , INTstate)
+##              print("INT Quality :", DOpath+'.q :', Quality_state(INTquality))
+##              iec61850.MmsValue_delete(qualityMMS[0])
+##      else :
+##              print("Reading Status after command failed")
+##      return INTstate,INTquality
 
 ''' Function to read the INTEGER from CO status value'''
 def ReadCOINTValue(iedconnection,iedconnerr,DOpath):
@@ -200,6 +205,7 @@ def ReadCOINTValue(iedconnection,iedconnerr,DOpath):
 		#iec61850.MmsValue_delete(qualityMMS[0])
 	else :
 		print("Reading Status after command failed")
+		
 	return INTstate
 
 ''' Function to read the INTEGER value'''
@@ -215,6 +221,7 @@ def ReadINTValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_
 		iec61850.MmsValue_delete(qualityMMS[0])
 	else :
 		print("Reading Status after command failed")
+		
 	return INTstate,INTquality
 
 ''' Function to read the FLOAT status value'''
@@ -230,6 +237,7 @@ def ReadFLOATValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_F
 		iec61850.MmsValue_delete(qualityMMS[0])
 	else :
 		print("Reading Status after command failed")
+		
 	return FLOATValue,FLOATquality
 
 ''' Function to read the STRING status value'''
@@ -245,6 +253,7 @@ def ReadSTRINGValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_
 		print("Float Value : ", DOpath, ' :' , stringValue)
 	else :
 		print("Reading Status after command failed")
+		
 	return stringValue
 
 ''' Function to capture last lastApplError.error != 0 this indicates a CommandTermination- '''
@@ -272,7 +281,7 @@ def SBOctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnection,selectValue=False,opera
 		iec61850.ControlObjectClient_setSynchroCheck(control,SYNCBit)
 		iec61850.ControlObjectClient_setTestMode(control, TestBit)
 		iec61850.ControlObjectClient_setOrigin(control, cmdIdentifier , cmdCategory)
-		iec61850.ControlObjectClient_setCtlNum(control, selectctlNum)
+		iec61850.ControlObjectClient_setCtlNum(control, ctlNum=(selectctlNum-1))
 		
 		slctvalue = iec61850.MmsValue_newBoolean(selectValue)
 		oprvalue = iec61850.MmsValue_newBoolean(operateValue)
@@ -298,6 +307,48 @@ def SBOctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnection,selectValue=False,opera
 		iec61850.ControlObjectClient_setCommandTerminationHandler(control,commandTerminationHandler(control), None)             
 
 		iec61850.MmsValue_delete(slctvalue)
+		iec61850.MmsValue_delete(oprvalue)
+
+		'''Wait for command termination message'''
+		time.sleep(cmdtimeout)
+
+		iec61850.ControlObjectClient_destroy(control)
+
+	return CmdAddCause,CmdError
+
+''' Function for SBO Normal DPC control with feedback status check '''
+def SBOctrlDPCNormal(ctrlpath,iedconnerr,iedconnection,operateValue=False,cancelctrl=False,
+		       operctrltimeafterselect=0,cmdtimeout=3,cmdCategory=3,
+		       cmdIdentifier='script', selectctlNum=1,operatectlNum=1):
+	
+	if (iedconnerr == iec61850.IED_ERROR_OK):
+	
+		control = iec61850.ControlObjectClient_create(ctrlpath, iedconnection)
+		iec61850.ControlObjectClient_setOrigin(control, cmdIdentifier , cmdCategory)
+		iec61850.ControlObjectClient_setCtlNum(control, selectctlNum)
+		
+		oprvalue = iec61850.MmsValue_newBoolean(operateValue)
+		
+		'''Send select'''
+		if iec61850.ControlObjectClient_select(control) :
+			if cancelctrl == True :
+				iec61850.ControlObjectClient_cancel(control)
+			else :
+				'''Send Execute'''
+				iec61850.ControlObjectClient_setCtlNum(control, operatectlNum)
+				if iec61850.ControlObjectClient_operate(control, oprvalue, operctrltimeafterselect):
+					print("command operated successfully")
+				else :
+					print("Commands operation failed")                                
+		else :
+			print("failed to select")
+
+		'''Get the command feedback '''
+		feedback=iec61850.ControlObjectClient_getLastApplError(control)
+		CmdAddCause = feedback.addCause
+		CmdError = feedback.error
+		iec61850.ControlObjectClient_setCommandTerminationHandler(control,commandTerminationHandler(control), None)             
+
 		iec61850.MmsValue_delete(oprvalue)
 
 		'''Wait for command termination message'''
