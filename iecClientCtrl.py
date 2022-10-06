@@ -3,6 +3,7 @@
 import os,sys,time
 from winreg import SetValue
 import iec61850
+from datetime import datetime
 
 def SPS_St_str(mmsInt):
 	if mmsInt == 0:
@@ -147,35 +148,43 @@ def ctrladdcausefeedbackstr(AddCause):
 def ReadSPSValue(iedconnection,iedconnerr,DOpath):
 	stValMMS = iec61850.IedConnection_readBooleanValue(iedconnection, (DOpath+'.stVal'), iec61850.IEC61850_FC_ST)
 	qualityMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.q'), iec61850.IEC61850_FC_ST)
+	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iec61850.IEC61850_FC_ST)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 		SPSstate = stValMMS[0]
 		SPSquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
 		print("SPS State : ", DOpath+'.stVal :' , SPS_St_str(SPSstate))
 		print("SPS Quality :", DOpath+'.q :', Quality_state(SPSquality))
+		print("SPS timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
 		#iec61850.MmsValue_delete(stValMMS[0])
 		iec61850.MmsValue_delete(qualityMMS[0])
+		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return SPSstate,SPSquality
+	return SPSstate,SPSquality,INTtime
 
 ''' Function to read the DPS status value'''
 def ReadDPSValue(iedconnection,iedconnerr,DOpath):
 	stValMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.stVal'), iec61850.IEC61850_FC_ST)
 	qualityMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.q'), iec61850.IEC61850_FC_ST)
+	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iec61850.IEC61850_FC_ST)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 		DPSstate = iec61850.Dbpos_fromMmsValue(stValMMS[0])
 		DPSquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
 		print("DPS State : ", DOpath+'.stVal :' , DPS_St_str(DPSstate))
 		print("DPS Quality :", DOpath+'.q :', Quality_state(DPSquality))
+		print("DPS timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
 		iec61850.MmsValue_delete(stValMMS[0])
 		iec61850.MmsValue_delete(qualityMMS[0])
+		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return DPSstate,DPSquality
+	return DPSstate,DPSquality,INTtime
 
 ##''' Function to read the INTEGER from ST status value'''
 ##def ReadSTINTValue(iedconnection,iedconnerr,DOpath):
@@ -212,33 +221,41 @@ def ReadCOINTValue(iedconnection,iedconnerr,DOpath):
 def ReadINTValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_ST):
 	stValMMS = iec61850.IedConnection_readInt32Value(iedconnection, (DOpath+'.stVal'), iecFCType)
 	qualityMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.q'), iecFCType)
+	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iecFCType)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 		INTstate = stValMMS[0]
 		INTquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
 		print("INT State : ", DOpath+'.stVal :' , INTstate)
 		print("INT Quality :", DOpath+'.q :', Quality_state(INTquality))
+		print("INT timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
 		iec61850.MmsValue_delete(qualityMMS[0])
+		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return INTstate,INTquality
+	return INTstate,INTquality,INTtime
 
 ''' Function to read the FLOAT status value'''
 def ReadFLOATValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_MX):
 	stValMMS = iec61850.IedConnection_readFloatValue(iedconnection, (DOpath+'.mag.f'), iecFCType)
 	qualityMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.q'), iecFCType)
+	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iecFCType)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 		FLOATValue = stValMMS[0]
 		FLOATquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
 		print("Float Value : ", DOpath+'.mag.f :' , FLOATValue)
 		print("Float Quality :", DOpath+'.q :', Quality_state(FLOATquality))
+		print("Float timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
 		iec61850.MmsValue_delete(qualityMMS[0])
+		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return FLOATValue,FLOATquality
+	return FLOATValue,FLOATquality,INTtime
 
 ''' Function to read the STRING status value'''
 def ReadSTRINGValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_CO):
