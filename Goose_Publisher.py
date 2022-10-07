@@ -11,20 +11,10 @@ GOOSEconfRev = 1
 GOOSEdatasetRef = "simpleIOGenericIO/LLN0$AnalogValues"
 goosedatasetlist = [False, False, False, False]
 
-#fcda1 = iec61850.MmsValue_newBoolean(goosedatasetlist[0])
-#fcda2 = iec61850.MmsValue_newBoolean(goosedatasetlist[1])
-#fcda3 = iec61850.MmsValue_newBoolean(goosedatasetlist[2])
-#fcda4 = iec61850.MmsValue_newBoolean(goosedatasetlist[3])
-
-
 interface = "3"
 print("Using interface : " + interface)
     
 dataSetValues = iec61850.LinkedList_create()
-
-#f=iec61850.LinkedList_add(dataSetValues, iec61850.MmsValue_newBoolean(False));
-#g=iec61850.LinkedList_add(dataSetValues, iec61850.MmsValue_newBoolean(True));
-
 
 
 '''
@@ -40,9 +30,7 @@ def createdatasetFCDA (fcdalist):
 
 createdatasetFCDA(goosedatasetlist) 
 
-#h =iec61850.LinkedList_get(dataSetValues,0)
-#print(h.data)
-    
+   
 gooseCommParameters =  iec61850.CommParameters()
 iec61850.CommParameters_setDstAddress(gooseCommParameters,0x01,0x0c,0xcd,0x01,0x00,0x01)
 gooseCommParameters.appId  = 1000
@@ -70,31 +58,7 @@ if (publisher):
     goosedatasetlist = [True, True, True, True]
     createdatasetFCDA(goosedatasetlist) 
     iec61850.GoosePublisher_publish(publisher, dataSetValues)
-    #iec61850.GoosePublisher_destroy(publisher)    
-    '''i = 0
-
-    for i in range (0,6) :
-        time.sleep(1)
-        iec61850.GoosePublisher_publish(publisher, dataSetValues)
-        goosedatasetlist = [True, True, True, True]
-        createdatasetFCDA(goosedatasetlist) 
-        iec61850.GoosePublisher_publish(publisher, dataSetValues)
-             
-        if (i == 3) :
-            ###now change dataset to send an invalid GOOSE message 
-            goosedatasetlist = [True, True, True, True]
-            print(iec61850.LinkedList_size(dataSetValues))
-            createdatasetFCDA(goosedatasetlist)
-            #iec61850.LinkedList_remove(dataSetValues, removedatasetFCDA)
-            #iec61850.LinkedList_remove(dataSetValues, iec61850.MmsValue_delete(fcda2))
-            #iec61850.LinkedList_remove(dataSetValues, iec61850.MmsValue_delete(fcda3))
-            iec61850.GoosePublisher_publish(publisher, dataSetValues)          
-        
-        else :
-            if (iec61850.GoosePublisher_publish(publisher, dataSetValues) == -1) :
-                print("Error sending message!\n")'''
-    
-    
+    iec61850.GoosePublisher_destroy(publisher)    
 
 else :
     print("Failed to create GOOSE publisher. Reason can be that the Ethernet interface doesn't exist or root permission are required.\n");
