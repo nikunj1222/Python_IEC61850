@@ -5,13 +5,15 @@ from datetime import datetime
 
 class goosectrl:
         
-        GOOSEdatasetlist = [False]
-        
-        def __init__(self,interfaceid='3',GOOSEappid=1000, GOOSEvlanId=0, GOOSEvlanPriority=4, GOOSEctrlblkname='simpleIOGenericIO/LLN0$GO$gcbAnalogValues', 
+        GOOSEdatasetlistupdate =  [True, False, True, False, True]
+        GOOSEdatasetlistdefault = [True, False, True, False, True]
+        stNum = 1
+
+        def __init__(self,interfaceid='2',GOOSEappid=1000, GOOSEvlanId=1, GOOSEvlanPriority=7, GOOSEctrlblkname='simpleIOGenericIO/LLN0$GO$gcbAnalogValues',
                         GOOSEconfRev=1, GOOSEdatasetRef='simpleIOGenericIO/LLN0$AnalogValues', TimeAllowedToLive=500):                
                 self.interfaceid = interfaceid                                 
                 self.gooseCommParameters =  iec61850.CommParameters()
-                iec61850.CommParameters_setDstAddress(self.gooseCommParameters,0x01,0x0c,0xcd,0x01,0x00,0x01)
+                iec61850.CommParameters_setDstAddress(self.gooseCommParameters,0x01,0x0c,0xcd,0x01,0x01,0x01)
                 self.gooseCommParameters.appId  = GOOSEappid
                 self.gooseCommParameters.vlanId = GOOSEvlanId
                 self.gooseCommParameters.vlanPriority = GOOSEvlanPriority
@@ -33,6 +35,11 @@ class goosectrl:
                         h=iec61850.LinkedList_get(datasetvalueVar,0)
                         iec61850.LinkedList_remove(datasetvalueVar,h.data)
                 self.createdatasetFCDA(fcdalist, datasetvalueVar)
+                if(self.GOOSEdatasetlistdefault != fcdalist):
+                        iec61850.GoosePublisher_setSqNum(Publisher,0)
+                        self.GOOSEdatasetlistdefault = fcdalist
+                        iec61850.GoosePublisher_increaseStNum(Publisher)
+
                 iec61850.GoosePublisher_publish(Publisher, datasetvalueVar)
                 
         def GOOSEPublisher(self):
@@ -40,7 +47,7 @@ class goosectrl:
                         
                 dataSetValues = iec61850.LinkedList_create()
 
-                self.createdatasetFCDA(self.GOOSEdatasetlist,dataSetValues)
+                self.createdatasetFCDA(self.GOOSEdatasetlistupdate,dataSetValues)
                 
                 publisher = iec61850.GoosePublisher_create(self.gooseCommParameters, self.interfaceid)
                        
@@ -50,16 +57,16 @@ class goosectrl:
                         iec61850.GoosePublisher_setConfRev(publisher, self.GOOSEconfRev)
                         iec61850.GoosePublisher_setDataSetRef(publisher, self.GOOSEdatasetRef)
                         iec61850.GoosePublisher_setTimeAllowedToLive(publisher, self.TimeAllowedToLive)
-                        
                         iec61850.GoosePublisher_publish(publisher, dataSetValues)
+                        self.GOOSEdatasetlistdefault = self.GOOSEdatasetlistupdate
                         _DatasetSize = iec61850.LinkedList_size(dataSetValues)
                         
                         try:
                                 while True :            
-                                        self.publishupdatedGOOSE(self.GOOSEdatasetlist,dataSetValues,publisher)
-                                        time.sleep(self.TimeAllowedToLive/1000)
+                                        self.publishupdatedGOOSE(self.GOOSEdatasetlistupdate,dataSetValues,publisher)
+                                        time.sleep(0.8)
                                         
-                        except KeyboardInterrupt:                                
+                        except KeyboardInterrupt:
                                 iec61850.LinkedList_destroy(dataSetValues)
                                 iec61850.GoosePublisher_destroy(publisher)
                                  
