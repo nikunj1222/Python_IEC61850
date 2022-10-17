@@ -4,6 +4,18 @@ import os,sys,time
 from winreg import SetValue
 import iec61850
 from datetime import datetime
+import logging
+
+
+#Create and configure logger                
+#logging.basicConfig(filename='IECClientControlpyLogs', format= '[%(asctime)-4s] [%(filename)-4s] [%(levelname)-4s] %(message)s', filemode='a')
+
+#Creating an LOG object
+#logger = logging.getLogger()
+
+#Setting the threshold of the logger DEBUG
+#logger.setLevel(logging.DEBUG)
+
 
 def SPS_St_str(mmsInt):
 	if mmsInt == 0:
@@ -151,19 +163,19 @@ def ReadSPSValue(iedconnection,iedconnerr,DOpath):
 	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iec61850.IEC61850_FC_ST)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
-		SPSstate = stValMMS[0]
-		SPSquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
-		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
-		print("SPS State : ", DOpath+'.stVal :' , SPS_St_str(SPSstate))
-		print("SPS Quality :", DOpath+'.q :', Quality_state(SPSquality))
-		print("SPS timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
+		ReadSPSValue.SPSstate = stValMMS[0]
+		ReadSPSValue.SPSquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		ReadSPSValue.INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
+		print("SPS State : ", DOpath+'.stVal :' , SPS_St_str(ReadSPSValue.SPSstate))
+		print("SPS Quality :", DOpath+'.q :', Quality_state(ReadSPSValue.SPSquality))
+		print("SPS timestamp :", DOpath+'.t :', datetime.fromtimestamp(ReadSPSValue.INTtime/1e3))
 		#iec61850.MmsValue_delete(stValMMS[0])
 		iec61850.MmsValue_delete(qualityMMS[0])
 		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return SPSstate,SPSquality,INTtime
+	return ReadSPSValue.SPSstate,ReadSPSValue.SPSquality,ReadSPSValue.INTtime
 
 ''' Function to read the DPS status value'''
 def ReadDPSValue(iedconnection,iedconnerr,DOpath):
@@ -172,19 +184,19 @@ def ReadDPSValue(iedconnection,iedconnerr,DOpath):
 	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iec61850.IEC61850_FC_ST)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
-		DPSstate = iec61850.Dbpos_fromMmsValue(stValMMS[0])
-		DPSquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
-		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
-		print("DPS State : ", DOpath+'.stVal :' , DPS_St_str(DPSstate))
-		print("DPS Quality :", DOpath+'.q :', Quality_state(DPSquality))
-		print("DPS timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
+		ReadDPSValue.DPSstate = iec61850.Dbpos_fromMmsValue(stValMMS[0])
+		ReadDPSValue.DPSquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		ReadDPSValue.INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
+		print("DPS State : ", DOpath+'.stVal :' , DPS_St_str(ReadDPSValue.DPSstate))
+		print("DPS Quality :", DOpath+'.q :', Quality_state(ReadDPSValue.DPSquality))
+		print("DPS timestamp :", DOpath+'.t :', datetime.fromtimestamp(ReadDPSValue.INTtime/1e3))
 		iec61850.MmsValue_delete(stValMMS[0])
 		iec61850.MmsValue_delete(qualityMMS[0])
 		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return DPSstate,DPSquality,INTtime
+	return ReadDPSValue.DPSstate,ReadDPSValue.DPSquality,ReadDPSValue.INTtime
 
 ##''' Function to read the INTEGER from ST status value'''
 ##def ReadSTINTValue(iedconnection,iedconnerr,DOpath):
@@ -207,15 +219,15 @@ def ReadCOINTValue(iedconnection,iedconnerr,DOpath):
 	#qualityMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.q'), iec61850.IEC61850_FC_CO)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
-		INTstate = stValMMS[0]
+		ReadCOINTValue.INTstate = stValMMS[0]
 		#INTquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
-		print("INT State : ", DOpath+'.stVal :' , INTstate)
+		print("INT State : ", DOpath+'.stVal :' , ReadCOINTValue.INTstate)
 		#print("INT Quality :", DOpath+'.q :', Quality_state(INTquality))
 		#iec61850.MmsValue_delete(qualityMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return INTstate
+	return ReadCOINTValue.INTstate
 
 ''' Function to read the INTEGER value'''
 def ReadINTValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_ST):
@@ -224,18 +236,18 @@ def ReadINTValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_
 	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iecFCType)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
-		INTstate = stValMMS[0]
-		INTquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
-		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
-		print("INT State : ", DOpath+'.stVal :' , INTstate)
-		print("INT Quality :", DOpath+'.q :', Quality_state(INTquality))
-		print("INT timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
+		ReadINTValue.INTstate = stValMMS[0]
+		ReadINTValue.INTquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		ReadINTValue.INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
+		print("INT State : ", DOpath+'.stVal :' , ReadINTValue.INTstate)
+		print("INT Quality :", DOpath+'.q :', Quality_state(ReadINTValue.INTquality))
+		print("INT timestamp :", DOpath+'.t :', datetime.fromtimestamp(ReadINTValue.INTtime/1e3))
 		iec61850.MmsValue_delete(qualityMMS[0])
 		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return INTstate,INTquality,INTtime
+	return ReadINTValue.INTstate,ReadINTValue.INTquality,ReadINTValue.INTtime
 
 ''' Function to read the FLOAT status value'''
 def ReadFLOATValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_MX):
@@ -244,18 +256,18 @@ def ReadFLOATValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_F
 	timeMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.t'), iecFCType)
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
-		FLOATValue = stValMMS[0]
-		FLOATquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
-		INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
-		print("Float Value : ", DOpath+'.mag.f :' , FLOATValue)
-		print("Float Quality :", DOpath+'.q :', Quality_state(FLOATquality))
-		print("Float timestamp :", DOpath+'.t :', datetime.fromtimestamp(INTtime/1e3))
+		ReadFLOATValue.FLOATValue = stValMMS[0]
+		ReadFLOATValue.FLOATquality = iec61850.Quality_fromMmsValue(qualityMMS[0])
+		ReadFLOATValue.INTtime=iec61850.MmsValue_getUtcTimeInMs(timeMMS[0])
+		print("Float Value : ", DOpath+'.mag.f :' , ReadFLOATValue.FLOATValue)
+		print("Float Quality :", DOpath+'.q :', Quality_state(ReadFLOATValue.FLOATquality))
+		print("Float timestamp :", DOpath+'.t :', datetime.fromtimestamp(ReadFLOATValue.INTtime/1e3))
 		iec61850.MmsValue_delete(qualityMMS[0])
 		iec61850.MmsValue_delete(timeMMS[0])
 	else :
 		print("Reading Status after command failed")
 		
-	return FLOATValue,FLOATquality,INTtime
+	return ReadFLOATValue.FLOATValue,ReadFLOATValue.FLOATquality,ReadFLOATValue.INTtime
 
 ''' Function to read the STRING status value'''
 def ReadSTRINGValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_CO):
@@ -266,12 +278,12 @@ def ReadSTRINGValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_
 		for i in range(OCTETmaxsize):
 			octetValue = iec61850.MmsValue_getOctetStringOctet(STRINGValMMS[0],i)
 			stringbyteValue.append(octetValue)
-			stringValue = ''.join(map(chr, stringbyteValue))
-		print("Float Value : ", DOpath, ' :' , stringValue)
+			ReadSTRINGValue.stringValue = ''.join(map(chr, stringbyteValue))
+		print("Float Value : ", DOpath, ' :' , ReadSTRINGValue.stringValue)
 	else :
 		print("Reading Status after command failed")
 		
-	return stringValue
+	return ReadSTRINGValue.stringValue
 
 ''' Function to capture last lastApplError.error != 0 this indicates a CommandTermination- '''
 def commandTerminationHandler(ctrl):
@@ -376,8 +388,8 @@ def SBOctrlDPCNormal(ctrlpath,iedconnerr,iedconnection,operateValue=False,cancel
 	return CmdAddCause,CmdError
 
 ''' Function for Direct Execute Enhanced DPC control with feedback status check '''
-def DEctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setCommandTerminationHandlertion,operateValue=False,
-		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=0.1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
+def DEctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=False,
+		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 	
@@ -411,8 +423,8 @@ def DEctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setComman
 	return CmdAddCause,CmdError
 
 ''' Function for Direct Execute Enhanced SPC control '''
-def DEctrlSPCEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setCommandTerminationHandlertion,operateValue=False,
-		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=0.1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
+def DEctrlSPCEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=False,
+		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 	
@@ -446,8 +458,8 @@ def DEctrlSPCEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setComman
 	return CmdAddCause,CmdError
 
 ''' Function for Direct Execute Enhanced APC (Setpoint Integer) control '''
-def DEctrlSPINTEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setCommandTerminationHandlertion,operateValue=0,
-		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=0.1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
+def DEctrlSPINTEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=0,
+		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 	
@@ -457,7 +469,7 @@ def DEctrlSPINTEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setComm
 		iec61850.ControlObjectClient_setTestMode(control, TestBit)
 		iec61850.ControlObjectClient_setOrigin(control, cmdIdentifier , cmdCategory)
 		
-		oprvalue = iec61850.MmsValue_newInteger(operateValue)
+		oprvalue = iec61850.MmsValue_newIntegerFromInt16(operateValue)
 		
 		'''Send Execute'''
 		if iec61850.ControlObjectClient_operate(control, oprvalue, operctrltimeafterselect):
@@ -481,8 +493,8 @@ def DEctrlSPINTEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setComm
 	return CmdAddCause,CmdError
 
 ''' Function for Direct Execute Enhanced APC (Setpoint Float) control '''
-def DEctrlSPFLOATEnhanced(ctrlpath,iedconnerr,iedconnecControlObjectClient_setCommandTerminationHandlertion,operateValue=0.0,
-		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=0.1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
+def DEctrlSPFLOATEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=0.0,
+		      ILKBit=False,SYNCBit=False,TestBit=False,operctrltimeafterselect=1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
 	
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 	

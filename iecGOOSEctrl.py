@@ -1,5 +1,7 @@
 import os,sys,time
 from winreg import SetValue
+
+from pyautogui import FAILSAFE
 import iec61850
 from datetime import datetime
 
@@ -10,18 +12,22 @@ class goosectrl:
         stNum = 1
 
         def __init__(self,interfaceid='2',GOOSEappid=1000, GOOSEvlanId=1, GOOSEvlanPriority=7, GOOSEctrlblkname='simpleIOGenericIO/LLN0$GO$gcbAnalogValues',
-                        GOOSEconfRev=1, GOOSEdatasetRef='simpleIOGenericIO/LLN0$AnalogValues', TimeAllowedToLive=500):                
+                        GOOSEconfRev=1, GOOSEdatasetRef='simpleIOGenericIO/LLN0$AnalogValues', TimeAllowedToLive=500, mintime=10, maxtime=1000, timeincreament=10, vlantagstatus=False):                
                 self.interfaceid = interfaceid                                 
                 self.gooseCommParameters =  iec61850.CommParameters()
                 iec61850.CommParameters_setDstAddress(self.gooseCommParameters,0x01,0x0c,0xcd,0x01,0x01,0x01)
                 self.gooseCommParameters.appId  = GOOSEappid
                 self.gooseCommParameters.vlanId = GOOSEvlanId
                 self.gooseCommParameters.vlanPriority = GOOSEvlanPriority
+                self.vlantagstatus = vlantagstatus
                 self.GOOSEctrlblkname = GOOSEctrlblkname
                 self.GOOSEconfRev = GOOSEconfRev
                 self.GOOSEdatasetRef = GOOSEdatasetRef
                 self.TimeAllowedToLive  = TimeAllowedToLive
-                
+                #self.mintime = mintime
+                #self.maxtime = maxtime
+                #self.timeincreament = timeincreament
+                #self.GOOSEtranstime = timeincreament               
                 
         '''Create Goose dataset. Function input list of FCDA value and iec61850 dataset instance '''
         def createdatasetFCDA (self,fcdalist, datasetvalueVar):
@@ -37,9 +43,8 @@ class goosectrl:
                 self.createdatasetFCDA(fcdalist, datasetvalueVar)
                 if(self.GOOSEdatasetlistdefault != fcdalist):
                         iec61850.GoosePublisher_setSqNum(Publisher,0)
-                        self.GOOSEdatasetlistdefault = fcdalist
                         iec61850.GoosePublisher_increaseStNum(Publisher)
-
+                        self.GOOSEdatasetlistdefault = fcdalist
                 iec61850.GoosePublisher_publish(Publisher, datasetvalueVar)
                 
         def GOOSEPublisher(self):
@@ -49,7 +54,7 @@ class goosectrl:
 
                 self.createdatasetFCDA(self.GOOSEdatasetlistupdate,dataSetValues)
                 
-                publisher = iec61850.GoosePublisher_create(self.gooseCommParameters, self.interfaceid)
+                publisher = iec61850.GoosePublisher_createEx(self.gooseCommParameters, self.interfaceid, self.vlantagstatus)
                        
                 if (publisher):
                         _publishstatus = True
@@ -62,9 +67,9 @@ class goosectrl:
                         _DatasetSize = iec61850.LinkedList_size(dataSetValues)
                         
                         try:
-                                while True :            
+                                while True :       
                                         self.publishupdatedGOOSE(self.GOOSEdatasetlistupdate,dataSetValues,publisher)
-                                        time.sleep(0.8)
+                                        time.sleep(1)
                                         
                         except KeyboardInterrupt:
                                 iec61850.LinkedList_destroy(dataSetValues)
