@@ -5,7 +5,7 @@ This python library is build from mzAutomation pyiec61850 lib **(https://github.
 The idea of this lib is to create some python code for IEC61850 implemenatation.
 
 
-Following files were built from mzAutomation library :
+Following files were built from mzAutomation library for Windows :
 
 _iec61850.exp
 _iec61850.lib
