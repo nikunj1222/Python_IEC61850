@@ -3,7 +3,10 @@ from winreg import SetValue
 from xmlrpc.client import boolean
 from pyautogui import FAILSAFE
 import iec61850
+import threading
 #from datetime import datetime
+
+GoosepublishAction = threading.Event()
 
 def Quality_intvalue(quality):
         if quality == 'QUALITY_VALIDITY_GOOD':
@@ -49,10 +52,12 @@ class goosectrl:
         stNum = 1
 
         def __init__(self,interfaceid='2',GOOSEappid=1000, GOOSEvlanId=1, GOOSEvlanPriority=7, GOOSEctrlblkname='simpleIOGenericIO/LLN0$GO$gcbAnalogValues',
-                        GOOSEconfRev=1, GOOSEdatasetRef='simpleIOGenericIO/LLN0$AnalogValues', TimeAllowedToLive=500, mintime=10, maxtime=1000, timeincreament=10, vlantagstatus=False):                
+                        GOOSEconfRev=1, GOOSEdatasetRef='simpleIOGenericIO/LLN0$AnalogValues', TimeAllowedToLive=500, MacAddress = [0x01,0x0c,0xcd,0x01,0x00,0x01], mintime=10, maxtime=1000, timeincreament=10, vlantagstatus=False, simulationmode=False,
+                        needscommissioning= False):                
                 self.interfaceid = interfaceid                                 
                 self.gooseCommParameters =  iec61850.CommParameters()
-                iec61850.CommParameters_setDstAddress(self.gooseCommParameters,0x01,0x0c,0xcd,0x01,0x00,0x01)
+                self.MacAddress = MacAddress
+                iec61850.CommParameters_setDstAddress(self.gooseCommParameters,self.MacAddress[0],self.MacAddress[1],self.MacAddress[2],self.MacAddress[3],self.MacAddress[4],self.MacAddress[5])
                 self.gooseCommParameters.appId  = GOOSEappid
                 self.gooseCommParameters.vlanId = GOOSEvlanId
                 self.gooseCommParameters.vlanPriority = GOOSEvlanPriority
@@ -61,6 +66,8 @@ class goosectrl:
                 self.GOOSEconfRev = GOOSEconfRev
                 self.GOOSEdatasetRef = GOOSEdatasetRef
                 self.TimeAllowedToLive  = TimeAllowedToLive
+                self.simulationmode = simulationmode
+                self.needscommissioning = needscommissioning
                 #self.mintime = mintime
                 #self.maxtime = maxtime
                 #self.timeincreament = timeincreament
@@ -87,7 +94,7 @@ class goosectrl:
                                 iec61850.LinkedList_add(datasetvalueVar, iec61850.Dbpos_toMmsValue(None, valueof_l))
                         elif 'QUALITY' in fcdalist[l] :
                                 mmsval = iec61850.MmsValue_newBitString(13)
-                                iec61850.MmsValue_setBitStringFromIntegerBigEndian(mmsval,Quality_intvalue(fcdalist[l]))
+                                iec61850.MmsValue_setBitStringFromInteger(mmsval,Quality_intvalue(fcdalist[l]))
                                 iec61850.LinkedList_add(datasetvalueVar, mmsval)
 
         '''Remove existing FCDA in dataset and update it with new FCDA'''                
@@ -118,12 +125,14 @@ class goosectrl:
                         iec61850.GoosePublisher_setConfRev(publisher, self.GOOSEconfRev)
                         iec61850.GoosePublisher_setDataSetRef(publisher, self.GOOSEdatasetRef)
                         iec61850.GoosePublisher_setTimeAllowedToLive(publisher, self.TimeAllowedToLive)
+                        iec61850.GoosePublisher_setSimulation(publisher, self.simulationmode)
+                        iec61850.GoosePublisher_setNeedsCommission(publisher, self.needscommissioning)
                         iec61850.GoosePublisher_publish(publisher, dataSetValues)
                         self.GOOSEdatasetlistdefault = self.GOOSEdatasetlistupdate
                         _DatasetSize = iec61850.LinkedList_size(dataSetValues)
                         
                         try:
-                                while True :       
+                                while GoosepublishAction.is_set() :       
                                         self.publishupdatedGOOSE(self.GOOSEdatasetlistupdate,dataSetValues,publisher)
                                         time.sleep(1)
                                         

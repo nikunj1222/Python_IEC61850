@@ -177,6 +177,19 @@ def ReadSPSValue(iedconnection,iedconnerr,DOpath):
 		
 	return SPSstate,SPSquality,INTtime
 
+''' Function to Write the SPS status value for SP FC type'''
+
+def WriteBoolValue(iedconnection,iedconnerr,DOpath, Writevalue='False'):	
+	if (iedconnerr == iec61850.IED_ERROR_OK):
+		stValMMS = iec61850.IedConnection_readBooleanValue(iedconnection, (DOpath), iec61850.IEC61850_FC_SP)          
+		SPBoolValue = stValMMS[0]
+		iec61850.IedConnection_writeBooleanValue(iedconnection, DOpath, iec61850.IEC61850_FC_SP, Writevalue)
+		print("SP Bool Value : ", DOpath+' :' , SPS_St_str(SPBoolValue))
+		#iec61850.MmsValue_delete(stValMMS)
+	else :
+		print("Writing SP command failed")			
+	return SPBoolValue
+
 ''' Function to read the DPS status value'''
 def ReadDPSValue(iedconnection,iedconnerr,DOpath):
 	stValMMS = iec61850.IedConnection_readObject(iedconnection, (DOpath+'.stVal'), iec61850.IEC61850_FC_ST)
@@ -269,17 +282,29 @@ def ReadFLOATValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_F
 		
 	return FLOATValue,FLOATquality,INTtime
 
-''' Function to read the STRING status value'''
-def ReadSTRINGValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_CO):
+''' Function to read the STRING value of CO type'''
+def ReadCOSTRINGValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_CO):
 	STRINGValMMS = iec61850.IedConnection_readObject(iedconnection, DOpath , iecFCType)
 	if (iedconnerr == iec61850.IED_ERROR_OK):
 		OCTETmaxsize = iec61850.MmsValue_getOctetStringMaxSize(STRINGValMMS[0])
 		stringbyteValue = []
+		stringValue = ''
 		for i in range(OCTETmaxsize):
 			octetValue = iec61850.MmsValue_getOctetStringOctet(STRINGValMMS[0],i)
 			stringbyteValue.append(octetValue)
 			stringValue = ''.join(map(chr, stringbyteValue))
-		print("Float Value : ", DOpath, ' :' , stringValue)
+			print("String Value : ", DOpath, ' :' , stringValue)
+	else :
+		print("Reading Status after command failed")
+		
+	return stringValue
+
+''' Function to read the STRING status value'''
+def ReadSTRINGValue(iedconnection,iedconnerr,DOpath,iecFCType=iec61850.IEC61850_FC_CO):
+	STRINGValMMS = iec61850.IedConnection_readObject(iedconnection, DOpath , iecFCType)
+	if (iedconnerr == iec61850.IED_ERROR_OK):
+		stringValue = iec61850.MmsValue_toString(STRINGValMMS[0])
+		print("String Value : ", DOpath, ' :' , stringValue)
 	else :
 		print("Reading Status after command failed")
 		
@@ -397,6 +422,37 @@ def DEctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=False,
 		iec61850.ControlObjectClient_setInterlockCheck(control,ILKBit)
 		iec61850.ControlObjectClient_setSynchroCheck(control,SYNCBit)        
 		iec61850.ControlObjectClient_setTestMode(control, TestBit)
+		iec61850.ControlObjectClient_setOrigin(control, cmdIdentifier , cmdCategory)
+		
+		oprvalue = iec61850.MmsValue_newBoolean(operateValue)
+		
+		'''Send Execute'''
+		if iec61850.ControlObjectClient_operate(control, oprvalue, operctrltimeafterselect):
+			print("command operated successfully")
+		else :
+			print("Commands operation failed")
+
+		'''Get the command feedback '''
+		feedback=iec61850.ControlObjectClient_getLastApplError(control)
+		CmdAddCause = feedback.addCause
+		CmdError = feedback.error
+		iec61850.ControlObjectClient_setCommandTerminationHandler(control,commandTerminationHandler(control), None)
+
+		iec61850.MmsValue_delete(oprvalue)
+				
+		'''Wait for command termination message'''
+		time.sleep(cmdtimeout)
+
+		iec61850.ControlObjectClient_destroy(control)
+
+	return CmdAddCause,CmdError
+
+''' Function for Direct Execute Normal DPC control with feedback status check '''
+def DEctrlDPCNormal(ctrlpath,iedconnerr,iedconnection,operateValue=False,operctrltimeafterselect=1,cmdtimeout=3,cmdCategory=3,cmdIdentifier='script'):
+	
+	if (iedconnerr == iec61850.IED_ERROR_OK):
+	
+		control = iec61850.ControlObjectClient_create(ctrlpath, iedconnection)
 		iec61850.ControlObjectClient_setOrigin(control, cmdIdentifier , cmdCategory)
 		
 		oprvalue = iec61850.MmsValue_newBoolean(operateValue)
