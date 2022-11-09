@@ -6,7 +6,7 @@ import iec61850
 import threading
 #from datetime import datetime
 
-GoosepublishAction = threading.Event()
+
 
 def Quality_intvalue(quality):
         if quality == 'QUALITY_VALIDITY_GOOD':
@@ -45,15 +45,17 @@ def Quality_intvalue(quality):
                 Quality_int = 0  
         return Quality_int
 
-class goosectrl:
+class goosePub:
         
         GOOSEdatasetlistupdate =  [True, False, True, False, True]
         GOOSEdatasetlistdefault = [True, False, False, False, False, False, False, False, False, False, 'INTERMEDIATE', True, 'QUALITY_TEST'] 
         stNum = 1
-
+        _DatasetSize,_publishstatus = 0 , False
+        GoosepublishAction = threading.Event()
+        
         def __init__(self,interfaceid='2',GOOSEappid=1000, GOOSEvlanId=1, GOOSEvlanPriority=7, GOOSEctrlblkname='simpleIOGenericIO/LLN0$GO$gcbAnalogValues',
                         GOOSEconfRev=1, GOOSEdatasetRef='simpleIOGenericIO/LLN0$AnalogValues', TimeAllowedToLive=500, MacAddress = [0x01,0x0c,0xcd,0x01,0x00,0x01], mintime=10, maxtime=1000, timeincreament=10, vlantagstatus=False, simulationmode=False,
-                        needscommissioning= False):                
+                        needscommissioning= False, debugmode = False):                
                 self.interfaceid = interfaceid                                 
                 self.gooseCommParameters =  iec61850.CommParameters()
                 self.MacAddress = MacAddress
@@ -68,6 +70,7 @@ class goosectrl:
                 self.TimeAllowedToLive  = TimeAllowedToLive
                 self.simulationmode = simulationmode
                 self.needscommissioning = needscommissioning
+                self.debugmode = debugmode
                 #self.mintime = mintime
                 #self.maxtime = maxtime
                 #self.timeincreament = timeincreament
@@ -120,7 +123,7 @@ class goosectrl:
                 publisher = iec61850.GoosePublisher_createEx(self.gooseCommParameters, self.interfaceid, self.vlantagstatus)
                        
                 if (publisher):
-                        _publishstatus = True
+                        self._publishstatus = True
                         iec61850.GoosePublisher_setGoCbRef(publisher, self.GOOSEctrlblkname)
                         iec61850.GoosePublisher_setConfRev(publisher, self.GOOSEconfRev)
                         iec61850.GoosePublisher_setDataSetRef(publisher, self.GOOSEdatasetRef)
@@ -129,11 +132,17 @@ class goosectrl:
                         iec61850.GoosePublisher_setNeedsCommission(publisher, self.needscommissioning)
                         iec61850.GoosePublisher_publish(publisher, dataSetValues)
                         self.GOOSEdatasetlistdefault = self.GOOSEdatasetlistupdate
-                        _DatasetSize = iec61850.LinkedList_size(dataSetValues)
+                        self._DatasetSize = iec61850.LinkedList_size(dataSetValues)
                         
                         try:
-                                while GoosepublishAction.is_set() :       
+                                #while self.GoosepublishAction.is_set() :
+                                while True :       
                                         self.publishupdatedGOOSE(self.GOOSEdatasetlistupdate,dataSetValues,publisher)
+                                        if self.debugmode == True:
+                                                print('Goosepublished on interfaceid', self.interfaceid, '\nConfrev :', self.GOOSEconfRev, '\nDatasetRef :', self.GOOSEdatasetRef)
+                                                print('timeAllowedtolive :', self.TimeAllowedToLive, '\nSimulationmode :', self.simulationmode, '\nNeedscommissioning :', self.needscommissioning)
+                                                print('Datasetvalue : ', dataSetValues)
+                                                
                                         time.sleep(1)
                                         
                         except KeyboardInterrupt:
@@ -142,7 +151,5 @@ class goosectrl:
                                  
                 else :
                         print("Failed to create GOOSE publisher. Reason can be that the Ethernet interface doesn't exist or root permission are required.\n")
-                        _publishstatus = False
-                        
-                return _DatasetSize,_publishstatus
+                        self._publishstatus = False
         
