@@ -367,6 +367,9 @@ def SBOctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnection,selectValue=False,opera
 		time.sleep(cmdtimeout)
 
 		iec61850.ControlObjectClient_destroy(control)
+	else :
+		print("Command not sent due to communication failue. Please check your physical communication and communication parameter ")
+		
 
 	return CmdAddCause,CmdError
 
@@ -409,6 +412,9 @@ def SBOctrlDPCNormal(ctrlpath,iedconnerr,iedconnection,operateValue=False,cancel
 		time.sleep(cmdtimeout)
 
 		iec61850.ControlObjectClient_destroy(control)
+	else :
+		print("Command not sent due to communication failue. Please check your physical communication and communication parameter ")
+
 
 	return CmdAddCause,CmdError
 
@@ -444,6 +450,8 @@ def DEctrlDPCEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=False,
 		time.sleep(cmdtimeout)
 
 		iec61850.ControlObjectClient_destroy(control)
+	else :
+		print("Command not sent due to communication failue. Please check your physical communication and communication parameter ")
 
 	return CmdAddCause,CmdError
 
@@ -475,6 +483,8 @@ def DEctrlDPCNormal(ctrlpath,iedconnerr,iedconnection,operateValue=False,operctr
 		time.sleep(cmdtimeout)
 
 		iec61850.ControlObjectClient_destroy(control)
+	else :
+		print("Command not sent due to communication failue. Please check your physical communication and communication parameter ")
 
 	return CmdAddCause,CmdError
 
@@ -510,7 +520,9 @@ def DEctrlSPCEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=False,
 		time.sleep(cmdtimeout)
 
 		iec61850.ControlObjectClient_destroy(control)
-
+	else :
+		print("Command not sent due to communication failue. Please check your physical communication and communication parameter ")
+  
 	return CmdAddCause,CmdError
 
 ''' Function for Direct Execute Enhanced APC (Setpoint Integer) control '''
@@ -545,6 +557,8 @@ def DEctrlSPINTEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=0,
 		time.sleep(cmdtimeout)
 
 		iec61850.ControlObjectClient_destroy(control)
+	else :
+		print("Command not sent due to communication failue. Please check your physical communication and communication parameter ")
 
 	return CmdAddCause,CmdError
 
@@ -580,5 +594,7 @@ def DEctrlSPFLOATEnhanced(ctrlpath,iedconnerr,iedconnection,operateValue=0.0,
 		time.sleep(cmdtimeout)
 
 		iec61850.ControlObjectClient_destroy(control)
+	else :
+		print("Command not sent due to communication failue. Please check your physical communication and communication parameter ")
 
 	return CmdAddCause,CmdError
