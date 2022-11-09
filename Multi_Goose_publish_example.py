@@ -11,7 +11,7 @@ import iecGOOSEctrl
 import threading
 import logging
 
-iecGOOSEctrl.GoosepublishAction.set()
+#iecGOOSEctrl.GoosepublishAction.set()
 
 def datachange():
         while True:
@@ -51,15 +51,15 @@ logger = logging.getLogger(__name__)
 #Setting the threshold of the logger DEBUG
 logger.setLevel(logging.DEBUG)
 
-goose1 = iecGOOSEctrl.goosectrl(interfaceid='0', GOOSEappid=4, GOOSEvlanId=0, GOOSEvlanPriority=4,
+goose1 = iecGOOSEctrl.goosePub(interfaceid='3', GOOSEappid=4, GOOSEvlanId=0, GOOSEvlanPriority=4,
                                    GOOSEctrlblkname='Goose1System/LLN0$GO$gcb01',
                                    GOOSEconfRev=10000, GOOSEdatasetRef='P139System/LLN0$SETGooseDS_1',
-                                   TimeAllowedToLive=1000,vlantagstatus=False, MacAddress = [0x01,0x0c,0xcd,0x01,0x00,0x02])
+                                   TimeAllowedToLive=1000,vlantagstatus=False, MacAddress = [0x01,0x0c,0xcd,0x01,0x00,0x02], debugmode=False)
 
-goose2 = iecGOOSEctrl.goosectrl(interfaceid='0', GOOSEappid=4, GOOSEvlanId=0, GOOSEvlanPriority=4,
+goose2 = iecGOOSEctrl.goosePub(interfaceid='3', GOOSEappid=4, GOOSEvlanId=0, GOOSEvlanPriority=4,
                                    GOOSEctrlblkname='Goose2System/LLN0$GO$gcb01',
                                    GOOSEconfRev=10000, GOOSEdatasetRef='P139System/LLN0$SETGooseDS_1',
-                                   TimeAllowedToLive=1000,vlantagstatus=False)
+                                   TimeAllowedToLive=1000,vlantagstatus=False, debugmode=True)
 
 z = threading.Thread(target=datachange, args=())
 w = threading.Thread(target=datachange1, args=())
@@ -69,8 +69,10 @@ goosepublishthread2 = threading.Thread(target=goose2.GOOSEPublisher, args=())
 
 z.start()
 w.start()
+
 goosepublishthread1.start()
 goosepublishthread2.start()
+        
 
 
 #time.sleep(30)
