@@ -20,12 +20,12 @@ Currently I am developing this library as per my needs.
 
 
 
-Building python library.
+**Building python library**
  
 Install the following programs
-CMAKE https://cmake.org/download/
+**CMAKE https://cmake.org/download/
 Swig https://swig.org/download.html 
-Version > Python 3.6.8
+Version > Python 3.6.8**
 Make sure these programs are in the system path as shown below:
 C:\Python36\Scripts;C:\Python36;C:\Python36\libs;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\swigwin-4.0.1;C: \MinGW\bin
 
@@ -44,7 +44,7 @@ Press configure again and then generate.
 
 This will generate in visual studio solution project in build folder defined in the CMAKE application.
 
-2 files _iec61850.pyd and iec61850.py will be created, copy these files to the address C:\Python36\Lib\site-packages
+2 files ** _iec61850.pyd and iec61850.py** will be created, copy these files to the address C:\Python36\Lib\site-packages
 
 3 Open the the solution in VisualStudio 2017 and build the solution. After successful building following files is created.
-_iec61850.exp _iec61850.lib
+**_iec61850.exp _iec61850.lib**
