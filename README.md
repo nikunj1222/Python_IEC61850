@@ -23,15 +23,21 @@ Currently I am developing this library as per my needs.
 **Building python library**
  
 Install the following programs
+
 **CMAKE https://cmake.org/download/
+
 Swig https://swig.org/download.html 
+
 Version > Python 3.6.8**
+
 Make sure these programs are in the system path as shown below:
+
 C:\Python36\Scripts;C:\Python36;C:\Python36\libs;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\swigwin-4.0.1;C: \MinGW\bin
 
 Open the Cmake application and download all the basic packages 
 
 Download libiec61850 from the following link:
+
 https://github.com/mz-automation/libiec61850
 
 Open the CMAKE application and in source specify where the libiec61850 library is saved, in build the binaries specify the folder where it will be saved
